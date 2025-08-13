@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Buku{% endblock %}
+{% block content %}
+
+<h2>Daftar Buku</h2>
+
+<!-- Filter Section -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form method="get" class="d-flex">
+            <select name="genre" class="form-select me-2" onchange="this.form.submit()">
+                <option value="">Semua Genre</option>
+                <option value="fiksi" {% if request.GET.genre == 'fiksi' %}selected{% endif %}>Fiksi</option>
+                <option value="komik" {% if request.GET.genre == 'komik' %}selected{% endif %}>Komik</option>
+                <option value="motivasi" {% if request.GET.genre == 'motivasi' %}selected{% endif %}>Motivasi</option>
+            </select>
+            <select name="favorite" class="form-select" onchange="this.form.submit()">
+                <option value="0" {% if request.GET.favorite == '0' %}selected{% endif %}>Semua Buku</option>
+                <option value="1" {% if request.GET.favorite == '1' %}selected{% endif %}>Favorit Saja</option>
+            </select>
+            {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+                <th>Judul</th>
+                <th>Penulis</th>
+                <th>Genre</th>
+                <th>Tahun</th>
+                <th>Deskripsi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr class="book-row" data-book-id="{{ book.id }}" style="cursor: pointer;"
+                title="Klik untuk detail buku">
+                            <td class="text-center align-middle">
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-sm btn-outline-warning favorite-btn"
+                            data-book-id="{{ book.id }}"
+                            onclick="event.stopPropagation();"
+                            title="Toggle Favorit">
+                        <i class="bi bi-star{% if book.id in user_favorites %}-fill{% endif %}" id="star-{{ book.id }}"></i>
+                    </button>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="book-cover-container">
+                        {% if book.cover %}
+                            <img src="{{ book.cover.url }}" class="img-thumbnail">
+                        {% else %}
+                            <div class="no-cover">
+                                <small class="text-muted">No Cover</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="book-title">
+                        <strong>{{ book.title }}</strong>
+                    </div>
+                    {% if book.pages %}
+                        <br><small class="text-muted">{{ book.pages }} halaman</small>
+                    {% endif %}
+                    {% if not book.images_folder %}
+                        <br><small class="text-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Perlu diproses
+                        </small>
+                    {% endif %}
+                </td>
+                <td>{{ book.author|default:"-" }}</td>
+                <td>
+                    <span class="badge bg-secondary">{{ book.get_genre_display }}</span>
+                </td>
+                <td>{{ book.year|default:"-" }}</td>
+                <td>
+                    {% if book.description %}
+                        {{ book.description|truncatewords:10 }}
+                    {% else %}
+                        <span class="text-muted">Tidak ada deskripsi</span>
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">Tidak ada buku ditemukan</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <!-- First button -->
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}{% if request.GET.favorite %}&favorite={{ request.GET.favorite }}{% endif %}">
+                    First
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">First</span>
+            </li>
+        {% endif %}
+
+        <!-- Previous button -->
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}{% if request.GET.favorite %}&favorite={{ request.GET.favorite }}{% endif %}">
+                    Prev
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Prev</span>
+            </li>
+        {% endif %}
+
+        <!-- Current page info -->
+        <li class="page-item disabled">
+            <span class="page-link" style="background-color: #30475E; border-color: #30475E; color: white;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        <!-- Next button -->
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}{% if request.GET.favorite %}&favorite={{ request.GET.favorite }}{% endif %}">
+                    Next
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        {% endif %}
+
+        <!-- Last button -->
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}{% if request.GET.favorite %}&favorite={{ request.GET.favorite }}{% endif %}">
+                    Last
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Last</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Pagination info -->
+<div class="text-center mt-3">
+    <small class="text-muted">
+        Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+        ({{ page_obj.paginator.count }} total buku)
+    </small>
+</div>
+{% endif %}
+
+<style>
+.book-row:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.toast-notification {
+    transition: opacity 0.5s ease;
+}
+
+/* Pagination hover effects */
+.pagination .page-link:hover {
+    background-color: #F05454 !important;
+    border-color: #F05454 !important;
+    color: white !important;
+}
+
+/* Ukuran cover buku dalam tabel */
+.book-cover-container {
+    width: 50px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.book-cover-container img {
+    width: 50px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.book-cover-container .no-cover {
+    width: 50px;
+    height: 70px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* Membatasi tinggi cell */
+.book-row td {
+    vertical-align: middle;
+    max-height: 80px;
+    padding: 12px 8px;
+}
+
+/* Membatasi panjang teks judul */
+.book-title {
+    max-width: 200px;
+    overflow: hidden;
+}
+
+.book-title strong {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cek URL parameters untuk notifikasi
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Notifikasi upload buku
+    if (urlParams.has('uploaded')) {
+        const bookTitle = urlParams.get('uploaded');
+        showToast(`Buku "${bookTitle}" berhasil diupload.`, 'success');
+
+        // Hapus parameter dari URL tanpa reload
+        const newUrl = window.location.pathname + '?' +
+            Array.from(urlParams.entries())
+                .filter(([key]) => key !== 'uploaded')
+                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                .join('&');
+        window.history.replaceState({}, '', newUrl.endsWith('?') ? newUrl.slice(0, -1) : newUrl);
+    }
+
+    // Notifikasi edit buku
+    if (urlParams.has('edited')) {
+        const bookTitle = urlParams.get('edited');
+        showToast(`Buku "${bookTitle}" berhasil diperbarui.`, 'success');
+
+        // Hapus parameter dari URL tanpa reload
+        const newUrl = window.location.pathname + '?' +
+            Array.from(urlParams.entries())
+                .filter(([key]) => key !== 'edited')
+                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                .join('&');
+        window.history.replaceState({}, '', newUrl.endsWith('?') ? newUrl.slice(0, -1) : newUrl);
+    }
+
+    // Handle klik pada baris buku
+    const bookRows = document.querySelectorAll('.book-row');
+
+    bookRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const bookId = this.getAttribute('data-book-id');
+            // Ambil parameter halaman saat ini dan filter
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentPage = urlParams.get('page') || '1';
+            const genre = urlParams.get('genre') || '';
+            const favorite = urlParams.get('favorite') || '';
+            const query = urlParams.get('q') || '';
+
+            // Buat URL dengan menyertakan informasi pagination
+            let detailUrl = `/library/${bookId}/?page=${currentPage}`;
+            if (genre) detailUrl += `&genre=${encodeURIComponent(genre)}`;
+            if (favorite) detailUrl += `&favorite=${encodeURIComponent(favorite)}`;
+            if (query) detailUrl += `&q=${encodeURIComponent(query)}`;
+
+            // Arahkan ke halaman detail buku dengan parameter pagination
+            window.location.href = detailUrl;
+        });
+    });
+
+    // Handle favorit button dengan AJAX
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    favoriteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            const bookId = this.getAttribute('data-book-id');
+            const starIcon = document.getElementById(`star-${bookId}`);
+            const button = this;
+
+            // Disable button sementara
+            button.disabled = true;
+
+            // Kirim AJAX request
+            fetch(`/library/${bookId}/toggle-favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update star icon
+                    if (data.is_favorited) {
+                        starIcon.className = 'bi bi-star-fill';
+                        button.title = 'Hapus dari favorit';
+                    } else {
+                        starIcon.className = 'bi bi-star';
+                        button.title = 'Tambah ke favorit';
+                    }
+
+                    // Show toast notification
+                    showToast(data.message, 'success');
+                } else {
+                    showToast('Gagal mengubah status favorit', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan', 'error');
+            })
+            .finally(() => {
+                // Re-enable button
+                button.disabled = false;
+            });
+        });
+    });
+});
+
+// Function untuk menampilkan toast notification
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast-notification position-fixed fade show`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+
+    // Set background and text color based on type
+    if (type === 'success') {
+        toast.style.backgroundColor = '#30475E'; // blue-gray
+        toast.style.color = 'white';
+        toast.style.border = '1px solid #30475E';
+    } else {
+        toast.style.backgroundColor = '#F05454'; // red-accent
+        toast.style.color = 'white';
+        toast.style.border = '1px solid #F05454';
+    }
+
+    toast.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <span>${message}</span>
+            <button type="button" class="btn-close btn-close-white ms-3" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+
+    // Add to body
+    document.body.appendChild(toast);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+</script>
+
+<!-- Add CSRF token for AJAX -->
+{% csrf_token %}
+
+{% endblock %}

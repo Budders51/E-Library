@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - E-Library{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-cloud-upload me-2"></i>{{ title }}
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <!-- Progress Steps -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-center flex-fill">
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                     style="width: 40px; height: 40px; background-color: var(--blue-gray); color: white;">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </div>
+                                <div class="small text-muted">Upload File</div>
+                            </div>
+                            <div class="flex-fill" style="height: 2px; background-color: var(--light-gray); margin: 0 10px;"></div>
+                            <div class="text-center flex-fill">
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                     style="width: 40px; height: 40px; background-color: var(--light-gray); color: var(--dark-gray);">
+                                    <i class="bi bi-pencil"></i>
+                                </div>
+                                <div class="small text-muted">Detail Buku</div>
+                            </div>
+                            <div class="flex-fill" style="height: 2px; background-color: var(--light-gray); margin: 0 10px;"></div>
+                            <div class="text-center flex-fill">
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                     style="width: 40px; height: 40px; background-color: var(--light-gray); color: var(--dark-gray);">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="small text-muted">Selesai</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form method="post" enctype="multipart/form-data" id="bookForm">
+                    {% csrf_token %}
+
+                    <!-- File Upload Section -->
+                    <div class="mb-4">
+                        <label for="{{ form.file.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>File PDF
+                            {% if not is_edit %}<span class="text-danger">*</span>{% endif %}
+                        </label>
+
+                        {% if is_edit and book.file %}
+                        <!-- Informasi file yang sudah ada -->
+                        <div class="alert alert-info mb-3" style="background-color: rgba(48, 71, 94, 0.1); border-color: var(--blue-gray);">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-earmark-pdf me-2" style="font-size: 1.5rem; color: var(--blue-gray);"></i>
+                                <div class="flex-grow-1">
+                                    <strong>File saat ini:</strong> {{ book.file.name|default:"Tidak ada file" }}<br>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="border rounded p-4 text-center position-relative" style="border-style: dashed !important; border-color: var(--blue-gray) !important;">
+                            <i class="bi bi-cloud-upload text-muted mb-2" style="font-size: 2rem;"></i>
+                            <p class="mb-2">
+                                {% if is_edit %}
+                                    Upload file baru untuk mengganti file yang ada
+                                {% else %}
+                                    Drag & drop file atau klik untuk browse folder
+                                {% endif %}
+                            </p>
+                            <input type="file" class="position-absolute top-0 start-0 w-100 h-100" id="{{ form.file.id_for_label }}"
+                                   name="{{ form.file.name }}" accept=".pdf" {% if not is_edit %}required{% endif %}
+                                   style="opacity: 0; cursor: pointer; z-index: 10;">
+                            <small class="text-muted">Format file PDF</small>
+                        </div>
+                        {% if form.file.errors %}
+                            <div class="text-danger small mt-1">{{ form.file.errors.0 }}</div>
+                        {% endif %}
+                        <div id="fileName" class="mt-2 small text-success" style="display: none;"></div>
+                    </div>
+
+                    <!-- Book Details Section -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-book me-2"></i>Judul Buku <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="{{ form.title.id_for_label }}"
+                                   name="{{ form.title.name }}" value="{{ form.title.value|default:'' }}"
+                                   placeholder="Masukkan judul buku" required>
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.author.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-person me-2"></i>Penulis
+                            </label>
+                            <input type="text" class="form-control" id="{{ form.author.id_for_label }}"
+                                   name="{{ form.author.name }}" value="{{ form.author.value|default:'' }}"
+                                   placeholder="Nama penulis">
+                            {% if form.author.errors %}
+                                <div class="text-danger small mt-1">{{ form.author.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.year.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-calendar me-2"></i>Tahun Terbit
+                            </label>
+                            <input type="number" class="form-control" id="{{ form.year.id_for_label }}"
+                                   name="{{ form.year.name }}" value="{{ form.year.value|default:'' }}"
+                                   placeholder="2025" min="1900" max="2050">
+                            {% if form.year.errors %}
+                                <div class="text-danger small mt-1">{{ form.year.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.genre.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-tags me-2"></i>Genre
+                            </label>
+                            <select class="form-select" id="{{ form.genre.id_for_label }}" name="{{ form.genre.name }}">
+                                <option value="">Pilih genre</option>
+                                {% for value, label in form.genre.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if form.genre.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% if form.genre.errors %}
+                                <div class="text-danger small mt-1">{{ form.genre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-card-text me-2"></i>Deskripsi
+                        </label>
+                        <textarea class="form-control" id="{{ form.description.id_for_label }}"
+                                  name="{{ form.description.name }}" rows="4"
+                                  placeholder="Tuliskan deskripsi singkat tentang buku ini...">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="alert alert-info" style="background-color: rgba(48, 71, 94, 0.1); border-color: var(--blue-gray);">
+                        <h6><i class="bi bi-info-circle me-2"></i>Informasi Proses Upload</h6>
+                        <ul class="mb-0 small">
+                            <li>Cover buku akan dibuat dari halaman pertama PDF</li>
+                            <li>File PDF akan dikonversi menjadi gambar terlebih dahulu</li>
+                            <li>Proses konversi mungkin membutuhkan beberapa menit</li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="bi bi-cloud-upload me-1"></i>Upload Buku
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border" style="color: var(--blue-gray);" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="mt-3">Mengupload dan Memproses Buku</h5>
+                <p class="text-muted mb-0">Mohon tunggu, proses ini mungkin membutuhkan beberapa menit...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// File upload handling
+document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
+    const fileName = document.getElementById('fileName');
+    const file = e.target.files[0];
+
+    if (file) {
+        fileName.innerHTML = `<i class="bi bi-file-earmark-pdf me-1"></i>File dipilih: <strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+        fileName.style.display = 'block';
+
+        // Update progress visual
+        const steps = document.querySelectorAll('.rounded-circle');
+        steps[1].style.backgroundColor = 'var(--blue-gray)';
+        steps[1].style.color = 'white';
+    }
+});
+
+// Form submission handling
+document.getElementById('bookForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Uploading...';
+    loadingModal.show();
+});
+
+// Drag and drop
+const dropZone = document.querySelector('.border.rounded');
+const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    dropZone.style.backgroundColor = 'rgba(48, 71, 94, 0.1)';
+    dropZone.style.borderColor = 'var(--blue-gray)';
+}
+
+function unhighlight(e) {
+    dropZone.style.backgroundColor = '';
+    dropZone.style.borderColor = 'var(--blue-gray)';
+}
+
+dropZone.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files.length > 0) {
+        fileInput.files = files;
+        fileInput.dispatchEvent(new Event('change'));
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Profil | E-Library{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Notifikasi -->
+        <!-- Notifikasi khusus profil -->
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'profil' in message|lower or 'password' in message|lower or 'akun' in message|lower or 'berhasil diperbarui' in message|lower or 'berhasil diubah' in message|lower %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert"
+                     style="background-color: {% if message.tags == 'success' %}rgba(48, 71, 94, 0.15); border-color: #30475E; color: #222831;{% elif message.tags == 'error' %}rgba(240, 84, 84, 0.15); border-color: #F05454; color: #222831;{% else %}rgba(221, 221, 221, 0.3); border-color: #DDDDDD; color: #222831;{% endif %}">
+                    <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %} me-2" style="color: {% if message.tags == 'success' %}#30475E{% elif message.tags == 'error' %}#F05454{% else %}#30475E{% endif %};"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i>Profil Pengguna</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Foto Profil -->
+                    <div class="col-md-4 text-center">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" alt="Foto Profil"
+                                 class="img-fluid rounded-circle mb-3"
+                                 style="width: 200px; height: 200px; object-fit: cover; border: 3px solid var(--light-gray);">
+                        {% else %}
+                            <!-- Avatar Default dengan Initial -->
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto"
+                                 style="width: 200px; height: 200px; border: 3px solid var(--light-gray); background-color: var(--blue-gray);">
+                                <span class="text-white fw-bold" style="font-size: 4rem;">
+                                    {{ user.username|first|upper }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Informasi Profil -->
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Username:</strong></td>
+                                <td>{{ user.username }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>
+                                    {% if user.email %}
+                                        {{ user.email }}
+                                    {% else %}
+                                        <span class="text-muted">Belum diisi</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bergabung:</strong></td>
+                                <td>{{ user.date_joined|date:"d F Y" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'profile_edit' %}" class="btn btn-primary me-2">
+                        <i class="bi bi-pencil me-1"></i>Edit Profil
+                    </a>
+                    <a href="{% url 'change_password' %}" class="btn btn-primary">
+                        <i class="bi bi-key me-1"></i>Ubah Password
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistik -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Statistik</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background-color: rgba(48, 71, 94, 0.1);">
+                            <h3 style="color: var(--blue-gray);">{{ user.book_set.count }}</h3>
+                            <p class="text-muted mb-0">Buku Diupload</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background-color: rgba(48, 71, 94, 0.1);">
+                            <h3 style="color: var(--blue-gray);">{{ user.favorite_set.count }}</h3>
+                            <p class="text-muted mb-0">Buku Favorit</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cek URL parameters untuk notifikasi
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Notifikasi edit profil
+    if (urlParams.has('updated')) {
+        const updateType = urlParams.get('updated');
+        let message = '';
+
+        if (updateType === 'profile') {
+            message = 'Profil berhasil diperbarui!';
+        } else if (updateType === 'password') {
+            message = 'Password berhasil diubah!';
+        }
+
+        if (message) {
+            showToast(message, 'success');
+
+            // Hapus parameter dari URL tanpa reload
+            const newUrl = window.location.pathname + '?' +
+                Array.from(urlParams.entries())
+                    .filter(([key]) => key !== 'updated')
+                    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                    .join('&');
+            window.history.replaceState({}, '', newUrl.endsWith('?') ? newUrl.slice(0, -1) : newUrl);
+        }
+    }
+});
+
+// Function untuk menampilkan toast notification
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast-notification position-fixed fade show`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+
+    // Set background and text color based on type
+    if (type === 'success') {
+        toast.style.backgroundColor = '#30475E'; // blue-gray
+        toast.style.color = 'white';
+        toast.style.border = '1px solid #30475E';
+    } else {
+        toast.style.backgroundColor = '#F05454'; // red-accent
+        toast.style.color = 'white';
+        toast.style.border = '1px solid #F05454';
+    }
+
+    toast.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <span>${message}</span>
+            <button type="button" class="btn-close btn-close-white ms-3" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+
+    // Add to body
+    document.body.appendChild(toast);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ book.title }} - Preview | E-Library</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .preview-navbar {
+            background-color: #343a40;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .page-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 70px);
+            padding: 20px;
+        }
+        .page-image {
+            max-width: 100%;
+            max-height: calc(100vh - 150px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .page-info {
+            color: white;
+            font-weight: 500;
+        }
+        .nav-btn {
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Navbar untuk Preview -->
+<nav class="preview-navbar">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Back Button -->
+            <div>
+                <a href="{% url 'book_detail' book.pk %}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+
+            <!-- Page Info -->
+            <div class="page-info">
+                {{ current_page }} / {{ total_pages }}
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="d-flex gap-2">
+                {% if has_previous %}
+                    <a href="?page={{ previous_page }}" class="btn btn-outline-light nav-btn">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-light nav-btn" disabled>
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </button>
+                {% endif %}
+
+                {% if has_next %}
+                    <a href="?page={{ next_page }}" class="btn btn-outline-light nav-btn">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-light nav-btn" disabled>
+                        Next <i class="bi bi-chevron-right"></i>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div class="page-container">
+    <div class="text-center">
+        <img src="{{ image_url }}" alt="Halaman {{ current_page }}" class="page-image">
+
+        <!-- Page Navigation Arrows (Optional - for easier navigation) -->
+        <div class="mt-3">
+            {% if has_previous %}
+                <a href="?page={{ previous_page }}" class="btn btn-light me-2" title="Halaman Sebelumnya">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            {% endif %}
+
+            <span class="badge bg-dark fs-6 mx-2">Halaman {{ current_page }}</span>
+
+            {% if has_next %}
+                <a href="?page={{ next_page }}" class="btn btn-light ms-2" title="Halaman Berikutnya">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Book Title -->
+        <div class="mt-3">
+            <h5 class="text-muted">{{ book.title }}</h5>
+        </div>
+    </div>
+</div>
+
+<!-- Keyboard Navigation -->
+<script>
+document.addEventListener('keydown', function(e) {
+    // Arrow keys navigation
+    if (e.key === 'ArrowLeft' && {{ has_previous|yesno:"true,false" }}) {
+        window.location.href = '?page={{ previous_page }}';
+    } else if (e.key === 'ArrowRight' && {{ has_next|yesno:"true,false" }}) {
+        window.location.href = '?page={{ next_page }}';
+    }
+    // Escape key to go back
+    else if (e.key === 'Escape') {
+        window.location.href = '{% url "book_detail" book.pk %}';
+    }
+});
+
+// Touch/swipe navigation for mobile
+let startX = null;
+
+document.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+});
+
+document.addEventListener('touchend', function(e) {
+    if (startX === null) return;
+
+    let endX = e.changedTouches[0].clientX;
+    let diff = startX - endX;
+
+    // Swipe left (next page)
+    if (diff > 50 && {{ has_next|yesno:"true,false" }}) {
+        window.location.href = '?page={{ next_page }}';
+    }
+    // Swipe right (previous page)
+    else if (diff < -50 && {{ has_previous|yesno:"true,false" }}) {
+        window.location.href = '?page={{ previous_page }}';
+    }
+
+    startX = null;
+});
+</script>
+
+</body>
+</html>

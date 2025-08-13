@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}E-Library{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --light-gray: #DDDDDD;
+            --dark-gray: #222831;
+            --blue-gray: #30475E;
+            --red-accent: #F05454;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background-color: var(--dark-gray) !important;
+        }
+
+        .navbar-brand, .navbar-nav .nav-link {
+            color: var(--light-gray) !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--red-accent) !important;
+        }
+
+        .navbar .nav-link {
+            color: var(--light-gray) !important;
+        }
+
+        .navbar .nav-link:hover {
+            color: var(--red-accent) !important;
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--red-accent);
+            border-color: var(--red-accent);
+            color: white;
+        }
+
+        .btn-primary:focus {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+            box-shadow: 0 0 0 0.2rem rgba(48, 71, 94, 0.25);
+        }
+
+        .btn-primary.active,
+        .btn-primary:not(:disabled):not(.disabled):active {
+            background-color: var(--red-accent) !important;
+            border-color: var(--red-accent) !important;
+            color: white !important;
+        }
+
+        .btn-primary.active:focus,
+        .btn-primary:not(:disabled):not(.disabled):active:focus {
+            box-shadow: 0 0 0 0.2rem rgba(240, 84, 84, 0.25) !important;
+        }
+
+        .btn-primary:not(:disabled):not(.disabled):active,
+        .show > .btn-primary.dropdown-toggle {
+            background-color: var(--red-accent) !important;
+            border-color: var(--red-accent) !important;
+            color: white !important;
+        }
+
+        .btn-outline-success {
+            color: var(--light-gray);
+            border-color: var(--light-gray);
+            background-color: transparent;
+        }
+
+        .btn-outline-success:hover {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+            color: white;
+        }
+
+        .btn-outline-success.focus {
+            color: var(--blue-gray) !important;
+            border-color: var(--blue-gray) !important;
+            background-color: transparent !important;
+            box-shadow: 0 0 0 0.2rem rgba(48, 71, 94, 0.25) !important;
+        }
+
+        .btn-outline-success.active,
+        .btn-outline-success:not(:disabled):not(.disabled):active {
+            background-color: var(--blue-gray) !important;
+            border-color: var(--blue-gray) !important;
+            color: white !important;
+        }
+
+        .btn-outline-success.active:focus,
+        .btn-outline-success:not(:disabled):not(.disabled):active:focus {
+            box-shadow: 0 0 0 0.2rem rgba(48, 71, 94, 0.25) !important;
+        }
+
+        .btn-outline-success:not(:disabled):not(.disabled):active,
+        .show > .btn-outline-success.dropdown-toggle {
+            background-color: var(--light-gray) !important;
+            border-color: var(--light-gray) !important;
+            color: white !important;
+        }
+
+        .btn-outline-success:focus:not(:active):not(.active) {
+            color: var(--light-gray) !important;
+            border-color: var(--light-gray) !important;
+            background-color: transparent !important;
+        }
+
+        .btn-outline-light {
+            color: var(--light-gray);
+            border-color: var(--light-gray);
+        }
+
+        .btn-outline-light:hover {
+            background-color: var(--red-accent);
+            border-color: var(--red-accent);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--red-accent);
+            border-color: var(--red-accent);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+        }
+
+        .btn-warning {
+            background-color: var(--red-accent);
+            border-color: var(--red-accent);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+            color: white;
+        }
+
+        .btn-warning:focus {
+            background-color: var(--red-accent);
+            border-color: var(--red-accent);
+            box-shadow: 0 0 0 0.2rem rgba(240, 84, 84, 0.25);
+        }
+
+        .btn-warning.active,
+        .btn-warning:not(:disabled):not(.disabled):active {
+            background-color: var(--blue-gray) !important;
+            border-color: var(--blue-gray) !important;
+            color: white !important;
+        }
+
+        .btn-warning.active:focus,
+        .btn-warning:not(:disabled):not(.disabled):active:focus {
+            box-shadow: 0 0 0 0.2rem rgba(48, 71, 94, 0.25) !important;
+        }
+
+        .btn-warning:not(:disabled):not(.disabled):active,
+        .show > .btn-warning.dropdown-toggle {
+            background-color: var(--blue-gray) !important;
+            border-color: var(--blue-gray) !important;
+            color: white !important;
+        }
+
+        .btn-info {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: var(--dark-gray);
+            border-color: var(--dark-gray);
+        }
+
+        .btn-secondary {
+            background-color: var(--dark-gray);
+            border-color: var(--dark-gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+        }
+
+        .btn-outline-secondary {
+            color: var(--blue-gray);
+            border-color: var(--blue-gray);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+            color: white;
+        }
+
+        .btn-outline-warning {
+            color: var(--bs-yellow);
+            border-color: var(--bs-yellow);
+        }
+
+        .btn-outline-warning:hover {
+            background-color: var(--bs-yellow);
+            border-color: var(--bs-yellow);
+            color: white;
+        }
+
+        /* Card Styling */
+        .card {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 8px rgba(34, 40, 49, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--blue-gray);
+            color: white;
+            border-bottom: 1px solid var(--blue-gray);
+        }
+
+        /* Badge Styling */
+        .badge.bg-info {
+            background-color: var(--blue-gray) !important;
+            color: white;
+        }
+
+        .badge.bg-secondary {
+            background-color: var(--dark-gray) !important;
+            color: white;
+        }
+
+        /* Form Styling */
+        .form-control {
+            border-color: #ced4da;
+        }
+
+        .form-control:focus {
+            border-color: var(--blue-gray);
+            box-shadow: 0 0 0 0.2rem rgba(48, 71, 94, 0.25);
+        }
+
+        /* Alert Styling */
+        .alert-success {
+            background-color: rgba(48, 71, 94, 0.1);
+            border-color: var(--blue-gray);
+            color: var(--dark-gray);
+        }
+
+        .alert-danger {
+            background-color: rgba(240, 84, 84, 0.1);
+            border-color: var(--red-accent);
+            color: var(--dark-gray);
+        }
+
+        /* Link Styling */
+        a {
+            color: var(--blue-gray);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--red-accent);
+        }
+
+        /* Pagination Styling */
+        .page-link {
+            color: var(--blue-gray);
+            background-color: white;
+            border-color: var(--blue-gray);
+        }
+
+        .page-link:hover {
+            color: white;
+            background-color: var(--blue-gray);
+            border-color: var(--blue-gray);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--red-accent);
+            border-color: var(--red-accent);
+            color: white;
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: white;
+            border-color: #dee2e6;
+        }
+
+        /* Table Styling */
+        .table-striped > tbody > tr:nth-of-type(odd) > td {
+            background-color: rgba(221, 221, 221, 0.3);
+        }
+
+        .table th {
+            background-color: var(--blue-gray);
+            color: white;
+            border-color: var(--blue-gray);
+        }
+
+        /* Navbar text for username */
+        .navbar-text {
+            color: var(--light-gray) !important;
+        }
+
+        /* Search form styling */
+        .input-group .form-control {
+            border-right: none;
+        }
+
+        .input-group .btn {
+            border-left: none;
+        }
+
+        /* Styling book covers */
+        .book-cover-bg {
+            background-color: var(--light-gray);
+        }
+
+        /* Toast notifications */
+        .toast {
+            background-color: white;
+            border: 1px solid var(--blue-gray);
+        }
+
+        .toast-header {
+            background-color: var(--blue-gray);
+            color: white;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .bg-light {
+            background-color: var(--light-gray) !important;
+        }
+
+        .input-group .btn-outline-secondary {
+            border-color: #ced4da;
+            color: var(--dark-gray);
+            border-left: 1px solid #ced4da !important;
+        }
+
+        .input-group .form-control:focus + .btn-outline-secondary,
+        .input-group .btn-outline-secondary:focus {
+            border-color: var(--blue-gray);
+            border-left: 1px solid var(--blue-gray) !important;
+            box-shadow: 0 0 0 0.2rem rgba(48, 71, 94, 0.25);
+        }
+
+        .input-group .btn-outline-secondary:hover {
+            border-color: var(--blue-gray);
+            border-left: 1px solid var(--blue-gray) !important;
+            background-color: var(--blue-gray);
+            color: white;
+        }
+
+        .input-group .form-control:not(:last-child) {
+            border-right: 1px solid #ced4da;
+        }
+
+        .input-group .form-control:focus:not(:last-child) {
+            border-right: 1px solid var(--blue-gray);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home' %}">E-Library</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'book_list' %}">Katalog</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile' %}">Profil</a>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <a href="{% url 'book_create' %}" class="btn btn-primary">
+          <i class="bi bi-upload"></i> Upload
+        </a>
+        <form class="d-flex" method="get" action="{% url 'book_list' %}">
+          <div class="input-group">
+            <input class="form-control" type="search" placeholder="Cari Buku" name="q"
+                   value="{{ request.GET.q }}">
+            <button class="btn btn-outline-success" type="submit">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </form>
+        {% if user.is_authenticated %}
+            <span class="navbar-text me-2">{{ user.username }}</span>
+            <a class="btn btn-outline-light" href="{% url 'logout' %}">Keluar</a>
+        {% else %}
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

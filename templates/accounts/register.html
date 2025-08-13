@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Akun - E-Library{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-lg border-0">
+      <div class="card-header text-center">
+        <h3 class="mb-0"><i class="bi bi-book-fill me-2"></i>E-Library</h3>
+      </div>
+      <div class="card-body p-4">
+        <h4 class="card-title text-center mb-4">Daftar Akun Baru</h4>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="id_email" class="form-label">
+              <i class="bi bi-envelope me-1"></i>Email
+            </label>
+            <input type="email" class="form-control" id="id_email"
+                   name="email" value="{{ form.email.value|default:'' }}" placeholder="Masukkan email" required>
+            {% if form.email.errors %}
+              <div class="custom-error-message small mt-1">
+                <i class="bi bi-exclamation-circle me-1"></i>{{ form.email.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="id_password" class="form-label">
+              <i class="bi bi-lock me-1"></i>Password
+            </label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="id_password"
+                     name="password" placeholder="Masukkan password"required>
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_password', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="form-text">
+              Password minimal 8 karakter. Terdiri dari huruf besar, huruf kecil, dan angka.
+            </div>
+            {% if form.password.errors %}
+              <div class="custom-error-message small mt-1">
+                <i class="bi bi-exclamation-circle me-1"></i>{{ form.password.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="id_confirm_password" class="form-label">
+              <i class="bi bi-lock-fill me-1"></i>Konfirmasi Password
+            </label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="id_confirm_password"
+                     name="confirm_password" placeholder="Konfirmasi password" required>
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_confirm_password', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            {% if form.confirm_password.errors %}
+              <div class="custom-error-message small mt-1">
+                <i class="bi bi-exclamation-circle me-1"></i>{{ form.confirm_password.errors.0 }}
+              </div>
+            {% endif %}
+            {% if form.non_field_errors %}
+              <div class="custom-error-message small mt-1">
+                <i class="bi bi-exclamation-circle me-1"></i>{{ form.non_field_errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-person-plus me-1"></i>Daftar Akun
+            </button>
+          </div>
+        </form>
+
+        <div class="text-center">
+          <p class="mb-0">Sudah punya akun?
+            <a href="{% url 'login' %}" class="text-decoration-none fw-bold">Masuk Disini</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  const icon = button.querySelector('i');
+
+  if (input && icon) {
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'bi bi-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'bi bi-eye';
+    }
+  }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load library_filters %}
+{% block title %}{{ book.title }} - E-Library{% endblock %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-4">
+        <!-- Cover Buku -->
+        <div class="card">
+            {% if book.cover %}
+                <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 500px; object-fit: contain; background-color: #f8f9fa;">
+            {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <i class="bi bi-book text-muted" style="font-size: 4rem;"></i>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <!-- Judul dan Favorit -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h2 class="card-title">{{ book.title }}</h2>
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-outline-warning favorite-btn" data-book-id="{{ book.id }}" title="Toggle Favorit">
+                        <i class="bi bi-star{% if is_favorited %}-fill{% endif %}" id="star-{{ book.id }}"></i>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Info Buku -->
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Penulis:</strong></div>
+                    <div class="col-sm-9">{{ book.author|default:"-" }}</div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Genre:</strong></div>
+                    <div class="col-sm-9">
+                        <span class="badge bg-secondary">{{ book.get_genre_display }}</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Tahun Terbit:</strong></div>
+                    <div class="col-sm-9">{{ book.year|default:"-" }}</div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Jumlah Halaman:</strong></div>
+                    <div class="col-sm-9">{{ book.pages|default:"-" }} halaman</div>
+                </div>
+
+                <!-- Deskripsi -->
+                <div class="mb-4">
+                    <strong>Deskripsi:</strong>
+                    <p class="mt-2">
+                        {% if book.description %}
+                            {{ book.description|linebreaks }}
+                        {% else %}
+                            <span class="text-muted">Tidak ada deskripsi</span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- Kata-kata Relevan -->
+                <div class="mb-4" id="keywords-section" {% if not book.keywords %}style="display: none;"{% endif %}>
+                    <strong>Kata-kata Relevan:</strong>
+                    <div class="mt-2 keywords-container">
+                        {% if book.keywords %}
+                            {% for keyword in book.keywords|split:"," %}
+                                <span class="badge bg-info me-1 mb-1">{{ keyword }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="d-flex flex-wrap gap-2 mt-4">
+
+                    <a href="{% url 'book_preview' book.pk %}" class="btn btn-primary">
+                        <i class="bi bi-book-half"></i> Baca Buku
+                    </a>
+
+                    {% if book.file %}
+                    <a href="{{ book.file.url }}" class="btn btn-primary" download>
+                        <i class="bi bi-download"></i> Download PDF
+                    </a>
+                    {% endif %}
+
+                    {% if request.user.is_staff or book.uploader == request.user %}
+                    <a href="{% url 'book_update' book.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Hapus
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back Button -->
+<div class="mt-4">
+    <a href="{% url 'book_list' %}{% if request.GET %}?{% for key, value in request.GET.items %}{{ key }}={{ value }}{% if not forloop.last %}&{% endif %}{% endfor %}{% endif %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali ke Katalog
+    </a>
+</div>
+
+<!-- Custom Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background-color: #F05454; color: white; border-bottom: none;">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <div class="text-center mb-3">
+                    <i class="bi bi-trash3" style="font-size: 3rem; color: #F05454;"></i>
+                </div>
+                <p class="text-center mb-4" style="font-size: 1.1rem; color: #222831;">
+                    Apakah Anda yakin ingin menghapus buku "<strong>{{ book.title }}</strong>"?
+                </p>
+                <p class="text-center text-muted small">
+                    Tindakan ini tidak dapat dibatalkan. Semua data buku akan dihapus secara permanen.
+                </p>
+            </div>
+            <div class="modal-footer" style="border-top: none; padding: 1rem 2rem 2rem;">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-danger" onclick="deleteBook()" style="background-color: #F05454; border-color: #F05454;">
+                    <i class="bi bi-trash me-1"></i>Hapus Buku
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript untuk Konfirmasi Hapus dan Favorit -->
+<script>
+function confirmDelete() {
+    if (confirm("Apakah Anda yakin ingin menghapus buku ini?")) {
+        window.location.href = "{% url 'book_delete' book.pk %}";
+    }
+}
+
+// Implementasi favorite
+document.addEventListener('DOMContentLoaded', function() {
+    const favoriteBtn = document.querySelector('.favorite-btn');
+    if (favoriteBtn) {
+        favoriteBtn.addEventListener('click', function() {
+            const bookId = this.getAttribute('data-book-id');
+            const starIcon = document.getElementById(`star-${bookId}`);
+            const button = this;
+
+            // Disable button sementara
+            button.disabled = true;
+
+            // Kirim AJAX request
+            fetch(`/library/${bookId}/toggle-favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update favorite
+                    if (data.is_favorited) {
+                        starIcon.className = 'bi bi-star-fill';
+                        button.title = 'Hapus dari favorit';
+                    } else {
+                        starIcon.className = 'bi bi-star';
+                        button.title = 'Tambah ke favorit';
+                    }
+
+                    // Toast notification
+                    showToast(data.message, 'success');
+                } else {
+                    showToast('Gagal mengubah status favorit', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan', 'error');
+            })
+            .finally(() => {
+                // Re-enable button
+                button.disabled = false;
+            });
+        });
+    }
+});
+
+// Function untuk menampilkan toast notification
+function showToast(message, type = 'info') {
+    // Element Toast
+    const toast = document.createElement('div');
+    toast.className = `toast-notification position-fixed fade show`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+
+    toast.style.backgroundColor = '#30475E'; // blue-gray
+    toast.style.color = 'white';
+    toast.style.border = '1px solid #30475E';
+
+    toast.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <span>${message}</span>
+            <button type="button" class="btn-close btn-close-white ms-3" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+// Function untuk menghapus buku
+function deleteBook() {
+    // Kirim request AJAX untuk menghapus buku
+    fetch("{% url 'book_delete' book.pk %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            modal.hide();
+
+            // Tampilkan toast notifikasi
+            showToast(data.message, 'success');
+
+            // Redirect ke katalog setelah 2 detik
+            setTimeout(() => {
+                window.location.href = "{% url 'book_list' %}";
+            }, 2000);
+        } else {
+            // Tutup modal jika ada
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            if (modal) modal.hide();
+
+            showToast(data.message || 'Gagal menghapus buku', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+
+        // Tutup modal jika ada
+        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+        if (modal) modal.hide();
+
+        showToast('Terjadi kesalahan saat menghapus buku', 'error');
+    });
+}
+</script>
+
+<!-- Add CSRF token for AJAX -->
+{% csrf_token %}
+
+{% endblock %}

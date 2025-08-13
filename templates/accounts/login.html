@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Login - E-Library{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-lg border-0">
+      <div class="card-header text-center">
+        <h3 class="mb-0"><i class="bi bi-book-fill me-2"></i>E-Library</h3>
+      </div>
+      <div class="card-body p-4">
+        <h4 class="card-title text-center mb-4">Masuk ke Akun</h4>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert"
+                 style="background-color: {% if message.tags == 'success' %}rgba(76, 175, 80, 0.15); border-color: #4caf50; color: #222831;{% elif message.tags == 'error' %}rgba(240, 84, 84, 0.15); border-color: #F05454; color: #222831;{% else %}rgba(48, 71, 94, 0.15); border-color: #30475E; color: #222831;{% endif %}">
+              <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %} me-2" style="color: {% if message.tags == 'success' %}#4caf50{% elif message.tags == 'error' %}#F05454{% else %}#30475E{% endif %};"></i>
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="{{ form.email.id_for_label }}" class="form-label">
+              <i class="bi bi-envelope me-1"></i>Email
+            </label>
+            <input type="email" class="form-control" id="{{ form.email.id_for_label }}"
+                   name="{{ form.email.name }}" value="{{ form.email.value|default:'' }}" placeholder="Masukkan email" required>
+            {% if form.email.errors %}
+              <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}" class="form-label">
+              <i class="bi bi-lock me-1"></i>Password
+            </label>
+          <div class="input-group">
+                          <input type="password" class="form-control" id="{{ form.password.id_for_label }}"
+                   name="{{ form.password.name }}" placeholder="Masukkan password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_password', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+          </div>
+
+            {% if form.password.errors %}
+              <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Masuk
+            </button>
+          </div>
+        </form>
+
+        <div class="text-center">
+          <p class="mb-0">Belum punya akun?
+            <a href="{% url 'register' %}" class="text-decoration-none fw-bold">Daftar Disini</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script>
+function togglePassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  const icon = button.querySelector('i');
+
+  if (input && icon) {
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'bi bi-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'bi bi-eye';
+    }
+  }
+}
+</script>
+
+{% endblock %}
